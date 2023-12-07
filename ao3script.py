@@ -1,7 +1,11 @@
-import ao3
+
 import requests
+from bs4 import BeautifulSoup
+import re
+import ao3
 import time
 import csv
+import re
 from ao3 import utils
 from ao3 import AO3
 
@@ -30,39 +34,44 @@ def metadataFromURL(url):
         time.sleep(10)
 
 def metadataFromID(inputfileName, outputFileName):
-    #header = ['Title', 'Author', 'Fandoms', 'Relationships', 'Summary', 'Characters', 'Additional Tags', 'Rating', 'Warnings', 'Work Url']
+    header = ['Title', 'Author', 'Fandoms', 'Relationships', 'Summary', 'Characters', 'Additional Tags', 'Rating', 'Warnings', 'Work Url']
     inputFile = open(inputfileName)
-    work_ids = inputFile.readlines()
-    inputFile.close()      
+    work_ids = []
+    for work_id in inputFile:
+        work_id = work_id.strip()
+        work_ids.append(work_id)
+    print(len(work_ids))
+    inputFile.close()
     outputFile = open(outputFileName, 'a')
     api = AO3()
     writer = csv.writer(outputFile)
-    for idNumber in work_ids:        
+    for idNumber in work_ids:
         work = api.work(id=idNumber)
         try:
             metadata = [work.title, work.author, work.fandoms, work.relationship, work.summary, work.characters, work.additional_tags, work.rating, work.warnings, work.url]
             print('Grabbing metadata for '+ work.title)
-        except AttributeError: 
+        except AttributeError:
             metadata = [work.title, work.author, work.fandoms, '', work.summary, work.characters, work.additional_tags, work.rating, work.warnings, work.url]  
             print('Grabbing metadata for '+ work.title)
         writer.writerow(metadata)
-        print('5 second waiting period')
-        time.sleep(5)    
-    outputFile.close()    
+        #print('5 second waiting period after writing metadata')
+        time.sleep(5)
+    outputFile.close()
+    print('all work id\'s processed')
 
 def getWorkIDs(url):
     page = requests.get(url)
-    regexWorks = re.compile(r'/works/[0-9]{8}')
+    regexWorks = re.compile(r'/works/[0-9]{8}') #work ids are 8 characters long
     soup = BeautifulSoup(page.content, "html.parser")
     links = soup.findAll('a',href=regexWorks)
     newSet = set()
     for link in links:
         workid = link.get("href")
-        newSet.add(workid[7:15])
+        newSet.add(workid[7:15]) # removing duplicates and making sure we only get the ids
         print('adding work id for: '+ link.text)
         time.sleep(5)
     finalLinks = list(newSet)
-    print('Getting work ids for ' + len(finalLinks) + ' links')
+    print('Getting work ids for ' + str(len(finalLinks)) + ' links')
     file = open('work_ids.txt', 'a')
     for workid in finalLinks:
         file.write(workid+ "\n")
@@ -71,4 +80,5 @@ def getWorkIDs(url):
 
 
 fileName = 'work_ids.txt'
+getWorkIDs(url='')
 metadataFromID(inputfileName=fileName, outputFileName='fanficlist.csv')
