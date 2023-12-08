@@ -1,15 +1,13 @@
-
-import requests
-from bs4 import BeautifulSoup
-import re
+from bs4 import BeautifulSoup, Tag
 import ao3
 import time
 import csv
 import re
+import requests
 from ao3 import utils
 from ao3 import AO3
 
-def cleanUpCsv(string):
+def cleanUpCsv(fileName):
     file = open(fileName, 'a')
     reader = csv.reader(file)
     writer = csv.writer(file)
@@ -40,19 +38,20 @@ def metadataFromID(inputfileName, outputFileName):
     for work_id in inputFile:
         work_id = work_id.strip()
         work_ids.append(work_id)
-    print(len(work_ids))
+    print("Found " + str(len(work_ids)) + " work ids")
     inputFile.close()
     outputFile = open(outputFileName, 'a')
     api = AO3()
     writer = csv.writer(outputFile)
     for idNumber in work_ids:
         work = api.work(id=idNumber)
-        try:
-            metadata = [work.title, work.author, work.fandoms, work.relationship, work.summary, work.characters, work.additional_tags, work.rating, work.warnings, work.url]
-            print('Grabbing metadata for '+ work.title)
-        except AttributeError:
-            metadata = [work.title, work.author, work.fandoms, '', work.summary, work.characters, work.additional_tags, work.rating, work.warnings, work.url]  
-            print('Grabbing metadata for '+ work.title)
+        # try:
+        print('Grabbing metadata for '+ work.title)
+        #should try to find out way to check for any of these being null
+        metadata = [work.title, work.author, work.fandoms, work.relationship, work.summary, work.additional_tags, work.rating, work.warnings, work.url]  #, work.characters
+        # except AttributeError:
+        #     metadata = [work.title, work.author, work.fandoms, work.relationship, work.summary, work.additional_tags, work.rating, work.warnings, work.url]  #, work.characters
+        #     print('Grabbing metadata for '+ work.title)
         writer.writerow(metadata)
         #print('5 second waiting period after writing metadata')
         time.sleep(5)
@@ -68,15 +67,13 @@ def getWorkIDs(url):
     for link in links:
         workid = link.get("href")
         newSet.add(workid[7:15]) # removing duplicates and making sure we only get the ids
-        print('adding work id for: '+ link.text)
         time.sleep(5)
     finalLinks = list(newSet)
     print('Getting work ids for ' + str(len(finalLinks)) + ' links')
     file = open('work_ids.txt', 'a')
     for workid in finalLinks:
         file.write(workid+ "\n")
-        #print('adding work id: '+ workid + ' to file')
-        time.sleep(5)
+        print('adding work id: '+ workid + ' to file')
 
 
 fileName = 'work_ids.txt'
