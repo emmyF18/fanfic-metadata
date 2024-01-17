@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup, Tag
 import requests
 
 sess = requests.Session()
-bookmarkURL = 'https://archiveofourown.org/users/ /bookmarks?page=%3'
+bookmarkURL = 'https://archiveofourown.org/users//bookmarks?page=%6'
 bookmarks = []
 req = sess.get(bookmarkURL)
 soup = BeautifulSoup(req.text, features='html.parser')
@@ -28,7 +28,7 @@ for li_tag in ol_tag.findAll('li', attrs={'class': 'blurb'}):
             raise       
     time.sleep(3)
 print('found ' + str(len(bookmarks)) + ' bookmarks')            
-file = open('work_ids3.txt', 'a')
+file = open('work_idsTest.txt', 'a')
 for workid in bookmarks:
     file.write(workid+ "\n")
 file.close()

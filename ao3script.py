@@ -48,20 +48,24 @@ def metadataFromID(inputfileName, outputFileName):
     outputFile = open(outputFileName, 'a')
     api = AO3()
     writer = csv.writer(outputFile)
-    writer.writerow(csvHeader)
+    writer.writerow(csvHeader) #TODO: write this only if file is empty
     for idNumber in work_ids:
-        work = api.work(id=idNumber) #TODO: add a check for not found works
-        print('Grabbing metadata for '+ work.title + ' ID ' + str(idNumber))
-        metadata = [work.title, stripCharacters(work.author), stripCharacters(work.fandoms), stripCharacters(work.characters), stripCharacters(work.relationship), stripHTML(work.summary), stripCharacters(work.additional_tags), stripCharacters(work.rating), stripCharacters(work.warnings), work.words, work.url]
-        writer.writerow(metadata)
-        time.sleep(5) # 5 sec waiting period per ao3 TOS
+        try:
+            work = api.work(id=idNumber) 
+            print('Grabbing metadata for '+ work.title + ' ID ' + str(idNumber))
+            metadata = [work.title, stripCharacters(work.author), stripCharacters(work.fandoms), stripCharacters(work.characters), stripCharacters(work.relationship), stripHTML(work.summary), stripCharacters(work.additional_tags), stripCharacters(work.rating), stripCharacters(work.warnings), work.words, work.url]
+            writer.writerow(metadata)
+            time.sleep(5) # 5 sec waiting period per ao3 TOS
+        except:
+            print((str(idNumber))+ ' not found')
+            pass
     outputFile.close()
     print('all work id\'s processed')
 
 def getWorkIDs(url,fileName):
-    page = requests.get(url)
-    #page = requests.get(url,header=webHeaders)
-    regexWorks = re.compile(r'/works/[0-9]{8}') #work ids are 8 characters long
+    #page = requests.get(url)
+    page = requests.get(url,headers=webHeaders)
+    regexWorks = re.compile(r'/works/[0-9]+') #work ids are 8 characters long TODO:improve this
     soup = BeautifulSoup(page.content, "html.parser")
     links = soup.findAll('a',href=regexWorks)
     newSet = set()
@@ -75,7 +79,27 @@ def getWorkIDs(url,fileName):
         file.write(workid+ "\n")
         print('adding work id: '+ workid + ' to file')
 
+def getSeriesLinks(url,fileName):
+    #page = requests.get(url)
+    page = requests.get(url,headers=webHeaders)
+    regexWorks = re.compile(r'/series/[0-9]+')
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.findAll('a',href=regexWorks)
+    newSet = set()
+    for link in links:
+        workid = link.get("href").replace('/bookmarks', '')
+        newSet.add(workid)
+    finalIds = list(newSet)
+    file = open(fileName, 'a')
+    for id in finalIds:
+        file.write(f'https://archiveofourown.org{id}')
+    #print('Getting series ids for ' + str(len(finalIds)) + ' links')
+    # file = open(fileName, 'a')
+    # for workid in finalLinks:
+    #     file.write(workid+ "\n")
+    #     print('adding series id: '+ workid + ' to file')
 
-fileName = 'work_ids3.txt'
-getWorkIDs(url='https://archiveofourown.org/users//bookmarks?page=2',fileName=fileName)
-#metadataFromID(inputfileName=fileName, outputFileName='fanficlist3.csv')
+
+fileName = 'work_id1.txt'
+getWorkIDs(url='https://archiveofourown.org/users//bookmarks?page=1',fileName=fileName)
+metadataFromID(inputfileName=fileName, outputFileName='fanficlist1.csv')

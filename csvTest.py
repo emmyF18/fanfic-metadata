@@ -12,10 +12,11 @@ def stripCharacters(input):
         if char in result:
             result = result.replace(char, replacement)
     return result
-
 def stripHTML(html):
   cleantext = re.sub(cleanregx, '', html)
   return cleantext
+
+
 
 metadata = []
 outputFile = open('fanficlistTest.csv', 'a')
