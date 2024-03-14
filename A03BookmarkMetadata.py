@@ -61,6 +61,28 @@ def metadataFromID(inputfileName, outputFileName):
     if os.path.exists(inputfileName):
         os.remove(inputfileName)
 
+def getRestrictedMetadata(inputfileName, outputFileName): #TODO: it would be great to get the log-in feature working at some point so this is not needed
+    inputFile = open(inputfileName)
+    work_ids = []
+    for work_id in inputFile:
+        work_id = work_id.strip()
+        work_ids.append(work_id)
+    print("Found " + str(len(work_ids)) + " work ids")
+    inputFile.close()
+    outputFile = open(outputFileName, 'a')
+    api = AO3()
+    for idNumber in work_ids:
+        try:
+            work = api.work(id=idNumber) 
+            print('Grabbing metadata for '+ work.title + ' ID ' + str(idNumber))
+            metadata = [work.title, stripCharacters(work.author), stripCharacters(work.fandoms), stripCharacters(work.characters), stripCharacters(work.relationship), stripHTML(work.summary), stripCharacters(work.additional_tags), stripCharacters(work.rating), stripCharacters(work.warnings), work.words, work.url]
+            #writer.writerow(metadata)
+            time.sleep(5) # 5 sec waiting period per ao3 TOS
+        except:  
+            outputFile = open(outputFileName, 'a').write('https://archiveofourown.org/works/'+str(idNumber)+ "\n")
+            print((str(idNumber))+ ' not found')
+            pass
+    print('all work id\'s processed')  
 
 def getWorkIDs(username,fileName,page_no):
     sess = requests.Session()
@@ -85,7 +107,7 @@ def getWorkIDs(username,fileName,page_no):
                 raise       
         time.sleep(3)
     print('found ' + str(len(bookmarks)) + ' bookmarks')            
-    file = open(fileName, 'a')
+    file = open(fileName, "x")
     for workid in bookmarks:
         file.write(workid+ "\n")
     file.close()        
@@ -168,9 +190,10 @@ def getAllBookmarks(username, fileName):
     file.close()  
 
 
-pageNumber = '2'
-IDFileName = 'BookmarkID.txt'
+pageNumber = 1
+IDFileName = 'BookmarkIDs.txt'
 getWorkIDs(username='',fileName=IDFileName,page_no=pageNumber)
 #getAllBookmarks('','allBookmarks.txt')
-metadataFromID(inputfileName=fileName, outputFileName='MetadataPage'+pageNumber+'.csv')
+metadataFromID(inputfileName=IDFileName, outputFileName='MetadataPage'+ str(pageNumber) +'.csv')
+#getRestrictedMetadata(inputfileName='allBookmarks2.txt', outputFileName='Resricted.txt')
 #getSeriesLinks('','seriesLinks.txt')
