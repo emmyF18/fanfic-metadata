@@ -10,7 +10,7 @@ sess = requests.Session()
 bookmarkURL = 'https://archiveofourown.org/users//bookmarks?page=%d'
 bookmarks = []
 num_works = 0
-for page_no in itertools.count(start=58):
+for page_no in itertools.count(start=1):
     print("Finding page: \t" + str(page_no) + " of bookmarks. \t" + str(num_works) + " bookmarks ids found.")
     req = sess.get(bookmarkURL % page_no)
     soup = BeautifulSoup(req.text, features='html.parser')

@@ -30,6 +30,7 @@ def stripHTML(html):
 def metadataFromID(inputfileName, outputFileName):
     inputFile = open(inputfileName)
     work_ids = []
+    notFound = []
     for work_id in inputFile:
         work_id = work_id.strip()
         work_ids.append(work_id)
@@ -55,9 +56,14 @@ def metadataFromID(inputfileName, outputFileName):
             time.sleep(5) # 5 sec waiting period per ao3 TOS
         except:
             print((str(idNumber))+ ' not found')
+            notFound.append[idNumber]
             pass
     outputFile.close()
+    notFoundFile = open('Resricted.txt','a')
+    for idNumber in notFound:
+        notFoundFile.write('https://archiveofourown.org/works/'+str(idNumber)+ "\n")
     print('all work id\'s processed')
+    print('wrote '+str(len(work_ids))+ ' to ' +outputFileName+ '. '+str(len(notFound))+ ' works were not found and added to Restricted.txt') #TODO: this would likely be much better using a string builder
     if os.path.exists(inputfileName):
         os.remove(inputfileName)
 
@@ -191,9 +197,11 @@ def getAllBookmarks(username, fileName):
 
 
 pageNumber = 1
+IDFileName = 'allBookmarksP2.txt'
 IDFileName = 'BookmarkIDs.txt'
 getWorkIDs(username='',fileName=IDFileName,page_no=pageNumber)
 #getAllBookmarks('','allBookmarks.txt')
 metadataFromID(inputfileName=IDFileName, outputFileName='MetadataPage'+ str(pageNumber) +'.csv')
+#metadataFromID(inputfileName=IDFileName, outputFileName='MetadataPage'+ str(pageNumber) +'.csv')
 #getRestrictedMetadata(inputfileName='allBookmarks2.txt', outputFileName='Resricted.txt')
 #getSeriesLinks('','seriesLinks.txt')
