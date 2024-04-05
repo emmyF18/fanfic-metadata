@@ -36,16 +36,13 @@ def metadataFromID(inputfileName, outputFileName):
         work_ids.append(work_id)
     print("Found " + str(len(work_ids)) + " work ids")
     inputFile.close()
-    outputFile = open(outputFileName, 'a')
-    writer = csv.writer(outputFile)
-    writer.writerow(csvHeader)
-    # if(os.path.exists(outputFileName)):
-    #     outputFile = open(outputFileName, "a")
-    #     writer = csv.writer(outputFile)       
-    # else:
-    #     outputFile = open(outputFileName, 'o')
-    #     writer = csv.writer(outputFile)
-    #     writer.writerow(csvHeader)
+    if(os.path.exists(outputFileName)):
+         outputFile = open(outputFileName, 'a')
+         writer = csv.writer(outputFile)       
+    else:
+         outputFile = open(outputFileName, 'w')
+         writer = csv.writer(outputFile)
+         writer.writerow(csvHeader)
     api = AO3()    
     for idNumber in work_ids:
         try:
