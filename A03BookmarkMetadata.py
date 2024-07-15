@@ -60,7 +60,7 @@ def metadataFromID(inputfileName, outputFileName):
     for idNumber in notFound:
         notFoundFile.write('https://archiveofourown.org/works/'+str(idNumber)+ "\n")
     print('all work id\'s processed')
-    print('wrote '+str(len(work_ids))+ ' to ' +outputFileName+ '. '+str(len(notFound))+ ' works were not found and added to Restricted.txt') #TODO: this would likely be much better using a string builder
+    print('wrote '+str(len(work_ids))+ ' to ' +outputFileName+ '. '+str(len(notFound))+ ' works not found and added to Restricted.txt') #TODO: this would likely be much better using a string builder
     if os.path.exists(inputfileName):
         os.remove(inputfileName)
 
@@ -110,7 +110,7 @@ def getWorkIDs(username,fileName,page_no):
                 raise       
         time.sleep(3)
     print('found ' + str(len(bookmarks)) + ' bookmarks')            
-    file = open(fileName, "x")
+    file = open(fileName, "a")
     for workid in bookmarks:
         file.write(workid+ "\n")
     file.close()        
@@ -194,11 +194,11 @@ def getAllBookmarks(username, fileName):
 
 
 pageNumber = 1
-IDFileName = 'allBookmarksP2.txt'
-IDFileName = 'BookmarkIDs.txt'
-getWorkIDs(username='',fileName=IDFileName,page_no=pageNumber)
+endingPage = 7
+IDFileName = 'workID.txt'
+while pageNumber < endingPage:
+    getWorkIDs(username='',fileName=IDFileName,page_no=pageNumber)
+    pageNumber = pageNumber + 1
 #getAllBookmarks('','allBookmarks.txt')
-metadataFromID(inputfileName=IDFileName, outputFileName='MetadataPage'+ str(pageNumber) +'.csv')
-#metadataFromID(inputfileName=IDFileName, outputFileName='MetadataPage'+ str(pageNumber) +'.csv')
-#getRestrictedMetadata(inputfileName='allBookmarks2.txt', outputFileName='Resricted.txt')
+metadataFromID(inputfileName=IDFileName, outputFileName='Bookmarks.csv')
 #getSeriesLinks('','seriesLinks.txt')
