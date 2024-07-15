@@ -30,21 +30,19 @@ def stripHTML(html):
 def metadataFromID(inputfileName, outputFileName):
     inputFile = open(inputfileName)
     work_ids = []
+    notFound = []
     for work_id in inputFile:
         work_id = work_id.strip()
         work_ids.append(work_id)
     print("Found " + str(len(work_ids)) + " work ids")
     inputFile.close()
-    outputFile = open(outputFileName, 'a')
-    writer = csv.writer(outputFile)
-    writer.writerow(csvHeader)
-    # if(os.path.exists(outputFileName)):
-    #     outputFile = open(outputFileName, "a")
-    #     writer = csv.writer(outputFile)       
-    # else:
-    #     outputFile = open(outputFileName, 'o')
-    #     writer = csv.writer(outputFile)
-    #     writer.writerow(csvHeader)
+    if(os.path.exists(outputFileName)):
+         outputFile = open(outputFileName, 'a')
+         writer = csv.writer(outputFile)       
+    else:
+         outputFile = open(outputFileName, 'w')
+         writer = csv.writer(outputFile)
+         writer.writerow(csvHeader)
     api = AO3()    
     for idNumber in work_ids:
         try:
@@ -55,9 +53,14 @@ def metadataFromID(inputfileName, outputFileName):
             time.sleep(5) # 5 sec waiting period per ao3 TOS
         except:
             print((str(idNumber))+ ' not found')
+            notFound.append[idNumber]
             pass
     outputFile.close()
+    notFoundFile = open('Resricted.txt','a')
+    for idNumber in notFound:
+        notFoundFile.write('https://archiveofourown.org/works/'+str(idNumber)+ "\n")
     print('all work id\'s processed')
+    print('wrote '+str(len(work_ids))+ ' to ' +outputFileName+ '. '+str(len(notFound))+ ' works not found and added to Restricted.txt') #TODO: this would likely be much better using a string builder
     if os.path.exists(inputfileName):
         os.remove(inputfileName)
 
@@ -107,7 +110,7 @@ def getWorkIDs(username,fileName,page_no):
                 raise       
         time.sleep(3)
     print('found ' + str(len(bookmarks)) + ' bookmarks')            
-    file = open(fileName, "x")
+    file = open(fileName, "a")
     for workid in bookmarks:
         file.write(workid+ "\n")
     file.close()        
@@ -191,9 +194,11 @@ def getAllBookmarks(username, fileName):
 
 
 pageNumber = 1
-IDFileName = 'BookmarkIDs.txt'
-getWorkIDs(username='',fileName=IDFileName,page_no=pageNumber)
+endingPage = 7
+IDFileName = 'workID.txt'
+while pageNumber < endingPage:
+    getWorkIDs(username='',fileName=IDFileName,page_no=pageNumber)
+    pageNumber = pageNumber + 1
 #getAllBookmarks('','allBookmarks.txt')
-metadataFromID(inputfileName=IDFileName, outputFileName='MetadataPage'+ str(pageNumber) +'.csv')
-#getRestrictedMetadata(inputfileName='allBookmarks2.txt', outputFileName='Resricted.txt')
+metadataFromID(inputfileName=IDFileName, outputFileName='Bookmarks.csv')
 #getSeriesLinks('','seriesLinks.txt')

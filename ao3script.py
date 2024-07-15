@@ -100,6 +100,7 @@ def getSeriesLinks(url,fileName):
     #     print('adding series id: '+ workid + ' to file')
 
 
-fileName = 'work_id1.txt'
+#fileName = 'work_idsPage1.txt'
 getWorkIDs(url='https://archiveofourown.org/users//bookmarks?page=1',fileName=fileName)
 metadataFromID(inputfileName=fileName, outputFileName='fanficlist1.csv')
+metadataFromUrlsList()
