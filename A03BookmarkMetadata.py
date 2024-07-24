@@ -10,6 +10,9 @@ from datetime import datetime
 import collections
 import itertools
 import os
+import BookmarkMetadata.const
+import BookmarkMetadata.soup
+from BookmarkMetadata.soup import SoupRequests
 
 webHeaders = {'User-agent': 'Mozilla/5.0 (compatible; unofficial AO3 API; Bot;)'}
 csvHeader = ['Title', 'author', 'Fandom', 'Characters', 'Paring', 'Summary', 'Additional Tags', 'Rating', 'Warnings', 'Words', 'Work Url']
