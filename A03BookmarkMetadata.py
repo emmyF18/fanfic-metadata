@@ -18,18 +18,6 @@ webHeaders = {'User-agent': 'Mozilla/5.0 (compatible; unofficial AO3 API; Bot;)'
 csvHeader = ['Title', 'author', 'Fandom', 'Characters', 'Paring', 'Summary', 'Additional Tags', 'Rating', 'Warnings', 'Words', 'Work Url']
 cleanregx = re.compile('<.*?>') 
 
-def stripCharacters(input):
-    result = str(input)
-    replacements = [('\'', ''), ('[', ''), (']', '')]
-    for char, replacement in replacements:
-        if char in result:
-            result = result.replace(char, replacement)
-    return result
-
-def stripHTML(html):
-  cleantext = re.sub(cleanregx, '', html)
-  return cleantext
-
 def metadataFromID(inputfileName, outputFileName):
     inputFile = open(inputfileName)
     work_ids = []
@@ -90,33 +78,22 @@ def getRestrictedMetadata(inputfileName, outputFileName): #TODO: it would be gre
             pass
     print('all work id\'s processed')  
 
-def getWorkIDs(username,fileName,page_no):
-    sess = requests.Session()
-    bookmarkURL = 'https://archiveofourown.org/users/'+username+'/bookmarks?page=%d'
+def getWorkIDs(req,fileName,beg_pageNo, end_pageNo = 0):
     bookmarks = []
-    req = sess.get(bookmarkURL % page_no)
-    soup = BeautifulSoup(req.text, features='html.parser')
-
-    ol_tag = soup.find('ol', attrs={'class': 'bookmark'})
-    for li_tag in ol_tag.findAll('li', attrs={'class': 'blurb'}):
-        try:
-            for h4_tag in li_tag.findAll('h4', attrs={'class': 'heading'}):
-                for link in h4_tag.findAll('a'):
-                    if ('works' in link.get('href')) and not ('external_works' in link.get('href')):
-                        work_id = link.get('href').replace('/works/', '')
-                        bookmarks.append(work_id)
-                        print('found work id ' + work_id)
-        except KeyError: #deleted works
-            if 'deleted' in li_tag.attrs['class']:
-                pass
-            else:
-                raise       
-        time.sleep(3)
+    if(end_pageNo == 0):
+        bookmarks = req.getWorkIDs(beg_pageNo)
+    else:
+        allBookmarks = []
+        while beg_pageNo < endingPage:
+            tmp_bookmarks = req.getWorkIDs(beg_pageNo)
+            allBookmarks.extend(tmp_bookmarks)
+            beg_pageNo = beg_pageNo + 1
+        bookmarks = allBookmarks
     print('found ' + str(len(bookmarks)) + ' bookmarks')            
     file = open(fileName, "a")
     for workid in bookmarks:
         file.write(workid+ "\n")
-    file.close()        
+    file.close()  
 
 def getSeriesLinks(username, fileName):
     sess = requests.Session()
@@ -198,10 +175,9 @@ def getAllBookmarks(username, fileName):
 
 pageNumber = 1
 endingPage = 7
-IDFileName = 'workID.txt'
-while pageNumber < endingPage:
+IDFileName = 'workID1.txt'
+
     getWorkIDs(username='',fileName=IDFileName,page_no=pageNumber)
-    pageNumber = pageNumber + 1
-#getAllBookmarks('','allBookmarks.txt')
-metadataFromID(inputfileName=IDFileName, outputFileName='Bookmarks.csv')
+getWorkIDs(soup,IDFileName,pageNumber)
+#metadataFromID(inputfileName=IDFileName, outputFileName='Bookmarks.csv')
 #getSeriesLinks('','seriesLinks.txt')

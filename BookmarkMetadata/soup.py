@@ -1,34 +1,37 @@
 import requests
+import bs4
 from bs4 import BeautifulSoup
 from requests import codes
 
 class SoupRequests:
     username = ''
-    def __init__(self):
+    def __init__(self,usr):
         self.session = requests.Session()
+        self.username = usr
     def login(self, username, password):
         return
-    def getWorkIDs(self,username,fileName,page_no) -> list:
+    def getWorkIDs(self,page_no) -> list:
         sess = self.session
-        bookmarkURL = f'https://archiveofourown.org/users/{username}/bookmarks?page={page_no}'
+        bookmarkURL = f'https://archiveofourown.org/users/{self.username}/bookmarks?page={page_no}'
         bookmarks = []
         req = sess.get(bookmarkURL)
         soup = BeautifulSoup(req.text, features='html.parser')
 
         ol_tag = soup.find('ol', attrs={'class': 'bookmark'})
-        for li_tag in ol_tag.findAll('li', attrs={'class': 'blurb'}):
-            try:
-                for h4_tag in li_tag.findAll('h4', attrs={'class': 'heading'}):
-                    for link in h4_tag.findAll('a'):
-                        if ('works' in link.get('href')):
-                            work_id = link.get('href').replace('/works/', '')
-                            bookmarks.append(work_id)
-                            print('found work id ' + work_id)
-            except KeyError: #deleted works
-                if 'deleted' in li_tag.attrs['class']:
-                    pass
-                else:
-                    raise  
+        if(ol_tag is not None):
+            for li_tag in ol_tag.find_all('li', attrs={'class': 'blurb'}):
+                try:
+                    for h4_tag in li_tag.find_all('h4', attrs={'class': 'heading'}):
+                        for link in h4_tag.find_all('a'):
+                            if ('works' in link.get('href')):
+                                work_id = link.get('href').replace('/works/', '')
+                                bookmarks.append(work_id)
+                                print('found work id ' + work_id)
+                except KeyError: #deleted works
+                    if 'deleted' in li_tag.attrs['class']:
+                        pass
+                    else:
+                        raise  
         return bookmarks
     def getAllBookmarks(self, username,fileName) -> list:
         sess = self.session
@@ -63,4 +66,6 @@ class SoupRequests:
             except:
                 # In case of absence of "next"
                 break        
-            time.sleep(5)      
+            time.sleep(5)
+        return bookmarks    
+
